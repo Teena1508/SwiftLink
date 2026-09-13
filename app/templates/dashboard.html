@@ -1,0 +1,107 @@
+{% extends "base.html" %}
+
+{% block title %}Dashboard - SwiftLink{% endblock %}
+
+{% block content %}
+<div style="margin-bottom: 2rem; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem;">
+  <div>
+    <h2>User Dashboard</h2>
+    <p style="color: var(--text-muted);">Manage your shortened links, monitor click traffic, and access your API credentials.</p>
+  </div>
+  <a href="{{ url_for('web.index') }}" class="btn btn-primary">⚡ Shorten New Link</a>
+</div>
+
+<!-- Stats Summary Bar -->
+<div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 1.5rem; margin-bottom: 2rem;">
+  <div class="glass-card" style="margin-bottom: 0; padding: 1.5rem;">
+    <h4 style="color: var(--text-muted); font-size: 0.85rem; text-transform: uppercase;">Total Short Links</h4>
+    <div style="font-size: 2.2rem; font-weight: 700; color: var(--accent-primary); margin-top: 0.5rem;">{{ total_urls }}</div>
+  </div>
+  <div class="glass-card" style="margin-bottom: 0; padding: 1.5rem;">
+    <h4 style="color: var(--text-muted); font-size: 0.85rem; text-transform: uppercase;">Total Clicks Received</h4>
+    <div style="font-size: 2.2rem; font-weight: 700; color: var(--success); margin-top: 0.5rem;">{{ total_clicks }}</div>
+  </div>
+</div>
+
+<!-- API Key Card -->
+<div class="glass-card" style="margin-bottom: 2rem;">
+  <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem; margin-bottom: 1rem;">
+    <div>
+      <h3>Your Personal API Key</h3>
+      <p style="color: var(--text-muted); font-size: 0.9rem;">Use this key in the <code style="color: #38bdf8;">X-API-Key</code> header to perform authenticated API calls & link deletions.</p>
+    </div>
+    <form method="POST" action="{{ url_for('auth.regenerate_api_key') }}" onsubmit="return confirm('Regenerating your API key will invalidate the current key. Continue?');">
+      <button type="submit" class="btn btn-secondary btn-sm" id="regenerate-key-btn">🔄 Regenerate Key</button>
+    </form>
+  </div>
+  <div class="code-box">
+    <span id="api-key-text" style="word-break: break-all;">{{ api_key }}</span>
+    <button class="btn btn-secondary btn-sm" onclick="copyToClipboard('{{ api_key }}', this)">Copy Key</button>
+  </div>
+</div>
+
+<!-- User URLs Table -->
+<div class="glass-card">
+  <h3 style="margin-bottom: 1.5rem;">Your Shortened Links</h3>
+  {% if urls %}
+    <div class="table-container">
+      <table class="data-table">
+        <thead>
+          <tr>
+            <th>Short URL</th>
+            <th>Original Target URL</th>
+            <th>Clicks</th>
+            <th>Status</th>
+            <th>Created</th>
+            <th>Expires</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for url in urls %}
+            <tr>
+              <td>
+                <a href="{{ url.short_url }}" target="_blank" style="color: #38bdf8; text-decoration: none; font-weight: 600;">
+                  /{{ url.short_code }}
+                </a>
+                {% if url.is_custom_alias %}
+                  <span class="badge badge-custom" style="margin-left: 0.4rem;">Custom</span>
+                {% endif %}
+              </td>
+              <td style="max-width: 250px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">
+                <a href="{{ url.original_url }}" target="_blank" style="color: var(--text-muted); text-decoration: none;">
+                  {{ url.original_url }}
+                </a>
+              </td>
+              <td><strong style="color: var(--success);">{{ url.click_count }}</strong></td>
+              <td>
+                {% if url.is_expired %}
+                  <span class="badge badge-expired">Expired</span>
+                {% else %}
+                  <span class="badge badge-active">Active</span>
+                {% endif %}
+              </td>
+              <td style="font-size: 0.85rem; color: var(--text-muted);">
+                {{ url.created_at[:10] if url.created_at else 'N/A' }}
+              </td>
+              <td style="font-size: 0.85rem; color: var(--text-muted);">
+                {{ url.expires_at[:16].replace('T', ' ') if url.expires_at else 'Never' }}
+              </td>
+              <td>
+                <div style="display: flex; gap: 0.5rem;">
+                  <button class="btn btn-secondary btn-sm" onclick="copyToClipboard('{{ url.short_url }}', this)">Copy</button>
+                  <button class="btn btn-danger btn-sm" onclick="deleteUrl('{{ url.short_code }}', '{{ api_key }}')">Delete</button>
+                </div>
+              </td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  {% else %}
+    <p style="text-align: center; color: var(--text-muted); padding: 2rem;">
+      You haven't created any short links yet. <a href="{{ url_for('web.index') }}" style="color: var(--accent-primary);">Create your first link now</a>.
+    </p>
+  {% endif %}
+</div>
+{% endblock %}

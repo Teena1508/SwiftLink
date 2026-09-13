@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>{% block title %}{{ page_title if page_title else "SwiftLink - Next-Gen URL Shortener" }}{% endblock %}</title>
+  <meta name="description" content="A high-performance Flask URL shortener with custom aliases, collision handling, API keys, rate limiting, and analytics.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Outfit:wght@600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/main.css') }}">
+</head>
+<body>
+  <!-- Header Navbar -->
+  <header class="navbar">
+    <div class="nav-container">
+      <a href="{{ url_for('web.index') }}" class="brand-link" id="brand-logo-link">
+        <div class="brand-icon">⚡</div>
+        <span class="brand-text">SwiftLink</span>
+      </a>
+      <nav>
+        <ul class="nav-links">
+          <li><a href="{{ url_for('web.index') }}" class="nav-link">Home</a></li>
+          <li><a href="{{ url_for('web.analytics') }}" class="nav-link">Top Analytics</a></li>
+          {% if session.get('user_id') %}
+            <li><a href="{{ url_for('web.dashboard') }}" class="nav-link">Dashboard</a></li>
+            <li><a href="{{ url_for('auth.logout') }}" class="btn btn-secondary btn-sm" id="logout-btn">Logout ({{ session.get('username') }})</a></li>
+          {% else %}
+            <li><a href="{{ url_for('auth.login') }}" class="nav-link" id="login-link">Login</a></li>
+            <li><a href="{{ url_for('auth.register') }}" class="btn btn-primary btn-sm" id="register-btn">Get Started</a></li>
+          {% endif %}
+        </ul>
+      </nav>
+    </div>
+  </header>
+
+  <!-- Main Content Body -->
+  <main class="main-wrapper">
+    <!-- Flash Notifications -->
+    {% with messages = get_flashed_messages(with_categories=true) %}
+      {% if messages %}
+        {% for category, message in messages %}
+          <div class="alert alert-{{ category if category != 'error' else 'danger' }}">
+            {{ message }}
+          </div>
+        {% endfor %}
+      {% endif %}
+    {% endwith %}
+
+    {% if content_error %}
+      <div class="glass-card" style="text-align: center; max-width: 600px; margin: 3rem auto;">
+        <h2 style="color: var(--danger); margin-bottom: 1rem;">{{ page_title }}</h2>
+        <p style="color: var(--text-muted); margin-bottom: 1.5rem;">{{ content_error }}</p>
+        <a href="{{ url_for('web.index') }}" class="btn btn-primary">Return to Home</a>
+      </div>
+    {% else %}
+      {% block content %}{% endblock %}
+    {% endif %}
+  </main>
+
+  <!-- Footer -->
+  <footer>
+    <div class="container">
+      <p>&copy; 2026 SwiftLink API & Shortener. Built with Python & Flask.</p>
+    </div>
+  </footer>
+
+  <script src="{{ url_for('static', filename='js/main.js') }}"></script>
+</body>
+</html>

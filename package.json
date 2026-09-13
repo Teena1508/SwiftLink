@@ -1,0 +1,19 @@
+{
+  "name": "swiftlink-url-shortener",
+  "version": "1.0.0",
+  "description": "Flask URL Shortener & Analytics Web Application",
+  "main": "run.py",
+  "scripts": {
+    "dev": "PYTHONPATH=. ./venv/bin/python run.py",
+    "start": "PYTHONPATH=. ./venv/bin/python run.py",
+    "test": "PYTHONPATH=. ./venv/bin/pytest -v"
+  },
+  "keywords": [
+    "flask",
+    "url-shortener",
+    "python",
+    "api"
+  ],
+  "author": "",
+  "license": "MIT"
+}
